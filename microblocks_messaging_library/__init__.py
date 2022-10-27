@@ -76,3 +76,23 @@ class MicroblocksMessage:
             else:
                 self._buffer = buf[i:]
                 return result
+
+    def _processReceiveBroadcasts(self):
+        while True:
+            message = self.receiveBroadcasts()
+            if callable(self.on_message):
+                self.on_message(message)
+
+    def loopForever(self):
+        # blocking
+        # self.on_message = on_message
+        self._processReceiveBroadcasts()
+
+    def loopStart(self):
+        # non-blocking
+        # https://stackoverflow.com/questions/70625801/threading-reading-a-serial-port-in-python-with-a-gui
+        """
+        x = threading.Thread(target=self._process_recv_messgae, args=())
+        x.start()
+        """
+        pass

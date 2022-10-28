@@ -33,6 +33,9 @@ Work with the MicroBlocks code (you can save this PNG file, then drag it into Mi
 
 ![](./allScripts147900.png)
 
+## message flow diagram
+![](./MicroBlocks-Python-Communication.png)
+
 ## MicroBlocks interoperability
 - [MicroBlocks and Snap! Communication with Messages](https://wiki.microblocks.fun/snap/microblocks_snap_messaging)
 - [Microblocks Serial Protocol (version 2.09)](https://bitbucket.org/john_maloney/smallvm/src/master/misc/SERIAL_PROTOCOL.md)

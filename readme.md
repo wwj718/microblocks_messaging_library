@@ -34,7 +34,7 @@ Work with the MicroBlocks code (you can save this PNG file, then drag it into Mi
 ![](./allScripts147900.png)
 
 ## message flow diagram
-![](./MicroBlocks-Python-Communication.png)
+![](./MicroBlocks-Python-Communication.jpg)
 
 ## MicroBlocks interoperability
 - [MicroBlocks and Snap! Communication with Messages](https://wiki.microblocks.fun/snap/microblocks_snap_messaging)

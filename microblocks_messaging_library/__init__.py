@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 
 import serial
@@ -24,6 +24,8 @@ class MicroblocksMessage:
         self.ser.close()
 
     def sendBroadcast(self, aString):
+        if type(aString) != str:
+            raise TypeError("must be string")
         utf8 = aString.encode("utf-8")
         length = len(utf8) + 1
         bytes = (

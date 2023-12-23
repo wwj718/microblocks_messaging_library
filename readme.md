@@ -37,9 +37,9 @@ while True:
 
 ```python
 import time
-from microblocks_messaging_library import MicroblocksMessage
+from microblocks_messaging_library import MicroblocksSerialMessage
 
-m = MicroblocksMessage()
+m = MicroblocksSerialMessage()
 m.connect('/dev/tty.usbmodem1402') # replace the string with micro:bit port
 
 # broadcast message from Python to MicroBlocks

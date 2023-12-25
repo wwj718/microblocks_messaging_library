@@ -117,10 +117,10 @@ class MicroblocksBLEMessage:
         self.disconnect()
         pass
 
-    def connect(self, device_name):
+    def connect(self, device_name, timeout=3):
         # MicroBlocks KCY
         # assert len(self._ble.connections) == 0
-        for advertisement in self._ble.start_scan(ProvideServicesAdvertisement): # timeout=1
+        for advertisement in self._ble.start_scan(ProvideServicesAdvertisement, timeout=timeout): # timeout=1
             # if UARTService not in advertisement.services:
             if UARTService in advertisement.services:
                 print(f'found: {advertisement.complete_name}')
@@ -129,8 +129,8 @@ class MicroblocksBLEMessage:
                     print("connected")
                     break
 
-    def discover(self):
-        for advertisement in self._ble.start_scan(ProvideServicesAdvertisement):
+    def discover(self, timeout=3):
+        for advertisement in self._ble.start_scan(ProvideServicesAdvertisement, timeout=timeout):
             if UARTService in advertisement.services:
                 print(advertisement.complete_name)
                 # from IPython import embed; embed()
@@ -141,6 +141,8 @@ class MicroblocksBLEMessage:
             c.disconnect()
 
     def sendBroadcast(self, aString):
+        if len(self._ble.connections) == 0:
+            raise ValueError(f"Device not connected.")
         for connection in self._ble.connections:
             if type(aString) != str:
                 raise TypeError("must be string")
@@ -154,6 +156,8 @@ class MicroblocksBLEMessage:
             uart.write(bytes)
 
     def receiveBroadcasts(self):
+        if len(self._ble.connections) == 0:
+            raise ValueError(f"Device not connected.")
         assert len(self._ble.connections) == 1
         uart = self._ble.connections[0][UARTService]
         result = []

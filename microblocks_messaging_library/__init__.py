@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.0.3"
+__version__ = "0.1.1"
 
 
 import serial
@@ -123,18 +123,21 @@ class MicroblocksBLEMessage:
         for advertisement in self._ble.start_scan(ProvideServicesAdvertisement, timeout=timeout): # timeout=1
             # if UARTService not in advertisement.services:
             if UARTService in advertisement.services:
-                print(f'found: {advertisement.complete_name}')
                 if device_name == advertisement.complete_name:
                     self._ble.connect(advertisement)
-                    print("connected")
+                    print(f"{advertisement.complete_name} is connected")
                     break
 
     def discover(self, timeout=3):
+        found_devices = set()
         for advertisement in self._ble.start_scan(ProvideServicesAdvertisement, timeout=timeout):
             if UARTService in advertisement.services:
-                print(advertisement.complete_name)
-                # from IPython import embed; embed()
-
+                if advertisement.complete_name not in found_devices:
+                    print(advertisement.complete_name)
+                    found_devices.add(advertisement.complete_name)
+                    # from IPython import embed; embed()
+        return list(found_devices)
+    
     def disconnect(self):
         # all disconnect
         for c in self._ble.connections:

@@ -20,7 +20,7 @@ import time
 from microblocks_messaging_library import MicroblocksBLEMessage
 
 m = MicroblocksBLEMessage()
-# m.discover() # Discover MicroBlocks devices
+# found_devices = m.discover() # Discover MicroBlocks devices
 m.connect('MicroBlocks KCY') # replace the string with the device name
 
 # broadcast message from Python to MicroBlocks

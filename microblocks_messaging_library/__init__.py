@@ -1,13 +1,16 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 
 import serial
+
 from adafruit_ble import BLERadio
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.nordic import UARTService
+from adafruit_ble.uuid import VendorUUID
+from adafruit_ble.characteristics.stream import StreamOut, StreamIn
 
 class MicroblocksSerialMessage:
     def __init__(self, verbose=False):
@@ -102,6 +105,24 @@ class MicroblocksSerialMessage:
         pass
 
 # ref: https://github.com/adafruit/Adafruit_CircuitPython_BLE/blob/744933f3061ce1d4007cb738737c66f19ebfcd27/examples/ble_uart_echo_client.py
+
+class MicroBlocksIDEService(UARTService):
+    """
+    Provide UART-like(Nordic NUS service) functionality via the MicroBlocks IDE service.
+    """
+
+    uuid = VendorUUID("BB37A001-B922-4018-8E74-E14824B3A638")
+    _server_tx = StreamOut(
+        uuid=VendorUUID("BB37A003-B922-4018-8E74-E14824B3A638"),
+        timeout=1.0,
+        buffer_size=64,
+    )
+    _server_rx = StreamIn(
+        uuid=VendorUUID("BB37A002-B922-4018-8E74-E14824B3A638"),
+        timeout=1.0,
+        buffer_size=64,
+    )
+
 class MicroblocksBLEMessage:
     '''
     only supports connecting to one device
@@ -121,8 +142,8 @@ class MicroblocksBLEMessage:
         # MicroBlocks KCY
         # assert len(self._ble.connections) == 0
         for advertisement in self._ble.start_scan(ProvideServicesAdvertisement, timeout=timeout): # timeout=1
-            # if UARTService not in advertisement.services:
-            if UARTService in advertisement.services:
+            # if MicroBlocksIDEService not in advertisement.services:
+            if MicroBlocksIDEService in advertisement.services:
                 if device_name == advertisement.complete_name:
                     self._ble.connect(advertisement)
                     print(f"{advertisement.complete_name} is connected")
@@ -131,7 +152,7 @@ class MicroblocksBLEMessage:
     def discover(self, timeout=3):
         found_devices = set()
         for advertisement in self._ble.start_scan(ProvideServicesAdvertisement, timeout=timeout):
-            if UARTService in advertisement.services:
+            if MicroBlocksIDEService in advertisement.services:
                 if advertisement.complete_name not in found_devices:
                     print(advertisement.complete_name)
                     found_devices.add(advertisement.complete_name)
@@ -155,14 +176,14 @@ class MicroblocksBLEMessage:
                 bytearray([251, 27, 0, length % 256, int(length / 256)]) + utf8 + b"\xfe"
             )
             # from IPython import embed; embed()
-            uart = connection[UARTService]
+            uart = connection[MicroBlocksIDEService]
             uart.write(bytes)
 
     def receiveBroadcasts(self):
         if len(self._ble.connections) == 0:
             raise ValueError(f"Device not connected.")
         assert len(self._ble.connections) == 1
-        uart = self._ble.connections[0][UARTService]
+        uart = self._ble.connections[0][MicroBlocksIDEService]
         result = []
         # data = self.ser.read() # 从 buffer 里读取
         data = uart.read(4)

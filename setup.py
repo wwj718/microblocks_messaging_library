@@ -36,8 +36,8 @@ setup(
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='MicroBlocks',
-    name='microblocks_messaging_library',
-    packages=['microblocks_messaging_library'],
+    name='microblocks',
+    packages=['microblocks'],
     entry_points={
         'console_scripts': [],
     },
@@ -45,6 +45,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/wwj718/microblocks_messaging_library',
-    version='0.2.0',
+    version='0.3.0',
     zip_safe=False,
 )

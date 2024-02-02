@@ -6,7 +6,7 @@ MicroBlocks and Python Communication with Messages.
 
 ```bash
 # Python3
-python -m pip install microblocks_messaging_library
+python -m pip install microblocks
 ```
 
 # Usage
@@ -17,20 +17,20 @@ python -m pip install microblocks_messaging_library
 
 ```python
 import time
-from microblocks_messaging_library import MicroblocksBLEMessage
+from microblocks import Message
 
-m = MicroblocksBLEMessage()
+m = Message()
 # found_devices = m.discover() # Discover MicroBlocks devices
 m.connect('MicroBlocks KCY') # replace the string with the device name
 
 # broadcast message from Python to MicroBlocks
-m.sendBroadcast('happy')
+m.send('happy')
 time.sleep(1)
-m.sendBroadcast('sad')
+m.send('sad')
 
 # receive broadcasts from MicroBlocks
 while True:
-    message = m.receiveBroadcasts()
+    message = m.receive()
     if message:
         print(message)
 ```
@@ -39,19 +39,19 @@ while True:
 
 ```python
 import time
-from microblocks_messaging_library import MicroblocksSerialMessage
+from microblocks import SerialMessage
 
-m = MicroblocksSerialMessage()
+m = SerialMessage()
 m.connect('/dev/tty.usbmodem1402') # replace the string with micro:bit port
 
 # broadcast message from Python to MicroBlocks
-m.sendBroadcast('happy')
+m.send('happy')
 time.sleep(1)
-m.sendBroadcast('sad')
+m.send('sad')
 
 # receive broadcasts from MicroBlocks
 while True:
-    message = m.receiveBroadcasts()
+    message = m.receive()
     if message:
         print(message)
 ```

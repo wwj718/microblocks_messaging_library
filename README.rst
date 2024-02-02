@@ -1,5 +1,5 @@
 ==============================
-microblocks_messaging_library
+microblocks
 ==============================
 
 
@@ -9,13 +9,13 @@ MicroBlocks and Python Communication with Messages.
 Install
 -------
 
-python -m pip install microblocks_messaging_library
+python -m pip install microblocks
 
 
 Usage
 -----
 
-from microblocks_messaging_library import MicroblocksMessage
+from microblocks import Message
 
 
 Features

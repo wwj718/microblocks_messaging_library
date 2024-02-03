@@ -33,6 +33,9 @@ while True:
     message = m.receive()
     if message:
         print(message)
+
+# receive(non-blocking) broadcasts from MicroBlocks. Work with m.on_message = <a function>
+# m.loopStart()
 ```
 
 ## serial
@@ -54,6 +57,9 @@ while True:
     message = m.receive()
     if message:
         print(message)
+
+# receive(non-blocking) broadcasts from MicroBlocks. Work with m.on_message = <a function>
+# m.loopStart()
 ```
 
 Work with the MicroBlocks code (you can save this PNG file, then drag it into MicroBlocks to load the scripts):

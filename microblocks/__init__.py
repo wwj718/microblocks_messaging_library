@@ -1,10 +1,11 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 import uuid
 import threading
+import time
 
 import serial
 
@@ -13,6 +14,8 @@ from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.nordic import UARTService
 from adafruit_ble.uuid import VendorUUID
 from adafruit_ble.characteristics.stream import StreamOut, StreamIn
+
+from dynatalk import Agent
 
 
 class MicroBlocksBase:
@@ -35,7 +38,10 @@ class MicroBlocksBase:
         if data:
             self._buffer = self._buffer + data
             for msgBytes in self._match(27):
-                result.append(msgBytes[4:].decode("utf-8").replace("\x00", ""))
+                try:
+                    result.append(msgBytes[4:].decode("utf-8").replace("\x00", ""))
+                except:
+                    pass
         if result == []:
             return None
         else:
@@ -86,6 +92,8 @@ class MicroBlocksBase:
             message = self.receiveBroadcasts()
             if callable(self.on_message):
                 self.on_message(message)
+            if callable(self._on_message):
+                self._on_message(message)
 
     def loopForever(self):
         # blocking
@@ -122,6 +130,7 @@ class MicroblocksSerialMessage(MicroBlocksBase):
     def receiveBroadcasts(self):
         data = self.ser.read()
         return self._decode_broadcast_message(data)
+
 
 
 # ref: https://github.com/adafruit/Adafruit_CircuitPython_BLE/blob/744933f3061ce1d4007cb738737c66f19ebfcd27/examples/ble_uart_echo_client.py
@@ -189,13 +198,13 @@ class MicroblocksBLEMessage(MicroBlocksBase):
     def disconnect(self):
         pass
         # print("connected:", self.connection.connected)
-        
-        '''
+
+        """
         if self.connection:
             self.connection.disconnect()
         else:
             raise ValueError("Device not connected.")
-        '''
+        """
 
     def sendBroadcast(self, aString):
         """
@@ -241,6 +250,59 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         from IPython import embed; embed()
         pass
         # self._ble.connections
+
+
+# patch dyantalk
+def send(self, message):
+    # self.supervisor.send(message)
+    callType = message["to"]
+    msgID = message["meta"]["id"]
+    actionName = message["action"]["name"]
+    args = message["action"]["args"]
+    # assert type(parameterList) == list
+    # msgID = f"python-{uuid.uuid4().hex[:8]}"
+    args = [f'"{i}"' if type(i) == str else i for i in args]
+    msg = [callType, msgID, actionName] + args
+    msg_string = ",".join([str(i) for i in msg])
+    # print("msg_string:", msg_string)
+    self.microblocks_client.sendBroadcast(msg_string)
+    return msgID
+
+Agent.send = send
+
+class MicroblocksClient(MicroblocksBLEMessage):
+    def __init__(self, device_name=None, verbose=False):
+        super().__init__(device_name, verbose)
+        self.agent = Agent("agent")
+        self.agent.microblocks_client = self
+        # print("connected:", self.connection.connected)
+        if self.connection.connected:
+            self.send("_start BLE loop")  # ??
+            time.sleep(0.1)
+            self.loopStart()
+
+    def _on_message(self, message):
+        # fake message
+        if message:
+            # print("_on_message:", message)
+            mb_message = message.split(",")
+            # print(mb_message)
+            if mb_message and mb_message[0] == "[response]":
+                parent_id = mb_message[1]
+                value = mb_message[2]
+                message = self.agent.generateMessage(
+                    parent_id, "agent", "[response]", {"value": value}
+                )
+                # print("message:", message)
+                self.agent._receive(message)
+
+    def request(self, actionName, args, callType="call", timeout=3):
+        # callType: call, blocking_call
+        parent_id = None
+        message = self.agent.generateMessage(parent_id, callType, actionName, args)
+        message["meta"]["id"] = 'python-' + message["meta"]["id"][:8]
+        return self.agent._request(message)
+
 
 SerialMessage = MicroblocksSerialMessage
 Message = MicroblocksBLEMessage

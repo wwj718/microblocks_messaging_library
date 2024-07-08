@@ -1,8 +1,9 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
+import uuid
 import threading
 
 import serial
@@ -152,6 +153,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
 
     def __init__(self, device_name=None, verbose=False):
         self._ble = BLERadio()
+        self.connection = None
         self._buffer = bytearray()
         self._verbose = verbose  # verbose: Print various debugging information
         self.on_message = None  # paho style:  https://www.eclipse.org/paho/index.php?page=clients/python/docs/index.php
@@ -168,7 +170,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
             # if MicroBlocksIDEService not in advertisement.services:
             if MicroBlocksIDEService in advertisement.services:
                 if device_name == advertisement.complete_name:
-                    self._ble.connect(advertisement)
+                    self.connection = self._ble.connect(advertisement)
                     print(f"{advertisement.complete_name} is connected")
                     break
 
@@ -185,11 +187,18 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         return list(found_devices)
 
     def disconnect(self):
-        # all disconnect
-        for c in self._ble.connections:
-            c.disconnect()
+        pass
+        # print("connected:", self.connection.connected)
+        
+        '''
+        if self.connection:
+            self.connection.disconnect()
+        else:
+            raise ValueError("Device not connected.")
+        '''
 
     def sendBroadcast(self, aString):
+        """
         if len(self._ble.connections) == 0:
             raise ValueError(f"Device not connected.")
         for connection in self._ble.connections:
@@ -197,16 +206,41 @@ class MicroblocksBLEMessage(MicroBlocksBase):
             # from IPython import embed; embed()
             uart = connection[MicroBlocksIDEService]
             uart.write(bytes)
+        """
+        if self.connection.connected:
+            bytes = self._generate_broadcast_message(aString)
+            self.connection[MicroBlocksIDEService].write(bytes)
+        else:
+            raise ValueError("Device not connected.")
 
     def receiveBroadcasts(self):
+        """
         if len(self._ble.connections) == 0:
             raise ValueError(f"Device not connected.")
         assert len(self._ble.connections) == 1
         uart = self._ble.connections[0][MicroBlocksIDEService]
         # data = self.ser.read() # 从 buffer 里读取
         data = uart.read(4)
-        return self._decode_broadcast_message(data)
+        """
+        if self.connection.connected:
+            data = self.connection[MicroBlocksIDEService].read(4)
+            return self._decode_broadcast_message(data)
+        else:
+            raise ValueError("Device not connected.")
 
+    def command(self, functionName, parameterList, callType="call"):
+        assert type(parameterList) == list
+        msgID = f"python-{uuid.uuid4().hex[:8]}"
+        parameterList = [f'"{i}"' if type(i) == str else i for i in parameterList]
+        msg = [callType, msgID, functionName] + parameterList
+        msg_string = ",".join([str(i) for i in msg])
+        # print("msg_string:", msg_string)
+        self.sendBroadcast(msg_string)
+
+    def debug(self):
+        from IPython import embed; embed()
+        pass
+        # self._ble.connections
 
 SerialMessage = MicroblocksSerialMessage
 Message = MicroblocksBLEMessage

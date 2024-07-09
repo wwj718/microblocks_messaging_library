@@ -2,6 +2,9 @@
 History
 =======
 
+* 0.7.0 (2024-07-09): Increase ble buffer size to resolve occasional msgBytes errors; upgrade adafruit-circuitpython-ble
+* 0.6.0 (2024-07-08): add MicroblocksClient
+* 0.5.0 (2024-07-08): Support connecting multiple BLE devices; 
 * 0.4.0 (2024-02-03)
 * 0.3.0 (2024-02-02)
 * 0.2.0 (2024-01-07)

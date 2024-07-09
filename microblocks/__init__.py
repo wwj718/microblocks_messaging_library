@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.6.2"
+__version__ = "0.7.0"
 
 import uuid
 import threading
@@ -41,7 +41,7 @@ class MicroBlocksBase:
                 try:
                     result.append(msgBytes[4:].decode("utf-8").replace("\x00", ""))
                 except:
-                    pass
+                    print("error msgBytes:", msgBytes)
         if result == []:
             return None
         else:
@@ -145,12 +145,12 @@ class MicroBlocksIDEService(UARTService):
     _server_tx = StreamOut(
         uuid=VendorUUID("BB37A003-B922-4018-8E74-E14824B3A638"),
         timeout=1.0,
-        buffer_size=64,
+        buffer_size=128,
     )
     _server_rx = StreamIn(
         uuid=VendorUUID("BB37A002-B922-4018-8E74-E14824B3A638"),
         timeout=1.0,
-        buffer_size=64,
+        buffer_size=128,
     )
 
 
@@ -239,7 +239,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
 
     def command(self, functionName, parameterList, callType="call"):
         assert type(parameterList) == list
-        msgID = f"python-{uuid.uuid4().hex[:8]}"
+        msgID = f"python-{uuid.uuid4().hex[:8]}" 
         parameterList = [f'"{i}"' if type(i) == str else i for i in parameterList]
         msg = [callType, msgID, functionName] + parameterList
         msg_string = ",".join([str(i) for i in msg])

@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 import uuid
 import threading
@@ -300,7 +300,8 @@ class MicroblocksClient(MicroblocksBLEMessage):
         # callType: call, blocking_call
         parent_id = None
         message = self.agent.generateMessage(parent_id, callType, actionName, args)
-        message["meta"]["id"] = 'python-' + message["meta"]["id"][:8]
+        # message["meta"]["id"] = 'python-' + message["meta"]["id"][:8]
+        message["meta"]["id"] = message["meta"]["id"][:6]
         return self.agent._request(message, timeout=timeout)
 
 

@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 
 import uuid
 import threading
@@ -132,7 +132,6 @@ class MicroblocksSerialMessage(MicroBlocksBase):
         return self._decode_broadcast_message(data)
 
 
-
 # ref: https://github.com/adafruit/Adafruit_CircuitPython_BLE/blob/744933f3061ce1d4007cb738737c66f19ebfcd27/examples/ble_uart_echo_client.py
 
 
@@ -162,6 +161,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
 
     def __init__(self, device_name=None, verbose=False):
         self._ble = BLERadio()
+        self.found_devices = {}
         self.connection = None
         self._buffer = bytearray()
         self._verbose = verbose  # verbose: Print various debugging information
@@ -173,27 +173,22 @@ class MicroblocksBLEMessage(MicroBlocksBase):
     def connect(self, device_name, timeout=3):
         # MicroBlocks KCY
         # assert len(self._ble.connections) == 0
-        for advertisement in self._ble.start_scan(
-            ProvideServicesAdvertisement, timeout=timeout
-        ):  # timeout=1
-            # if MicroBlocksIDEService not in advertisement.services:
-            if MicroBlocksIDEService in advertisement.services:
-                if device_name == advertisement.complete_name:
-                    self.connection = self._ble.connect(advertisement)
-                    print(f"{advertisement.complete_name} is connected")
-                    break
+        if device_name not in self.found_devices:
+            self.discover(timeout)
+
+        if device_name in self.found_devices:
+            self.connection = self._ble.connect(self.found_devices[device_name])
+            print(f"{device_name} is connected")
+        else:
+            raise Exception("Device not found")
 
     def discover(self, timeout=3):
-        found_devices = set()
         for advertisement in self._ble.start_scan(
             ProvideServicesAdvertisement, timeout=timeout
         ):
             if MicroBlocksIDEService in advertisement.services:
-                if advertisement.complete_name not in found_devices:
-                    print(advertisement.complete_name)
-                    found_devices.add(advertisement.complete_name)
-                    # from IPython import embed; embed()
-        return list(found_devices)
+                self.found_devices[advertisement.complete_name] = advertisement
+        return list(self.found_devices.keys())
 
     def disconnect(self):
         pass
@@ -239,7 +234,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
 
     def command(self, functionName, parameterList, callType="call"):
         assert type(parameterList) == list
-        msgID = f"python-{uuid.uuid4().hex[:8]}" 
+        msgID = f"python-{uuid.uuid4().hex[:8]}"
         parameterList = [f'"{i}"' if type(i) == str else i for i in parameterList]
         msg = [callType, msgID, functionName] + parameterList
         msg_string = ",".join([str(i) for i in msg])
@@ -247,7 +242,9 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         self.sendBroadcast(msg_string)
 
     def debug(self):
-        from IPython import embed; embed()
+        from IPython import embed
+
+        embed()
         pass
         # self._ble.connections
 
@@ -268,7 +265,9 @@ def send(self, message):
     self.microblocks_client.sendBroadcast(msg_string)
     return msgID
 
+
 Agent.send = send
+
 
 class MicroblocksClient(MicroblocksBLEMessage):
     def __init__(self, device_name=None, verbose=False):
@@ -276,7 +275,10 @@ class MicroblocksClient(MicroblocksBLEMessage):
         self.agent = Agent("agent")
         self.agent.microblocks_client = self
         # print("connected:", self.connection.connected)
-        if self.connection.connected:
+
+    def connect(self, device_name, timeout=3):
+        super().connect(device_name, timeout)
+        if self.connection and self.connection.connected:
             self.send("_start BLE loop")  # ??
             time.sleep(0.1)
             self.loopStart()

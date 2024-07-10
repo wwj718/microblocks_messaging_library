@@ -80,15 +80,20 @@ Work with the MicroBlocks code (you can save this PNG file, then drag it into Mi
 Save [this project(same as Snap!)](https://microblocksfun.cn/run/microblocks.html#project=https://wwj718.github.io/post/img/MicroBlocks-server-dynatalk.ubp) to your MicroBlocks device
 
 ```py
+# pip install -U microblocks
+
 from microblocks import MicroblocksClient
 
-m1 = MicroblocksClient("MicroBlocks AZB")
+client = MicroblocksClient()
+devices = client.discover(timeout=5)
+print("found devices:", devices)
+client.connect("MicroBlocks QCQ", timeout=3)
 
-m1.request("displayCharacter", ["f"])
+client.request("displayCharacter", ["f"])
 
 try:
     while True:
-      tiltX = m1.request("[sensors:tiltX]", [], timeout=1)
+      tiltX = client.request("[sensors:tiltX]", [], timeout=1)
       print(tiltX)
 except KeyboardInterrupt:
     pass

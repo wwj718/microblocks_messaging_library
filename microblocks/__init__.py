@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 
 import uuid
 import threading
@@ -195,7 +195,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         return list(MicroblocksBLEMessage.found_devices.keys())
 
     def disconnect(self):
-        print("disconnect")
+        # print("disconnect")
         # print("connected:", self.connection.connected)
         if self.connection and self.connection.connected:
             self.connection.disconnect()

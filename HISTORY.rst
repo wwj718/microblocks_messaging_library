@@ -1,6 +1,7 @@
 =======
 History
 =======
+* 0.8.0 (2024-07-11): Make it more robust
 * 0.7.1 (2024-07-10): Fix broken discover method; Optimize connection mechanism
 * 0.7.0 (2024-07-09): Increase ble buffer size to resolve occasional msgBytes errors; upgrade adafruit-circuitpython-ble
 * 0.6.0 (2024-07-08): add MicroblocksClient

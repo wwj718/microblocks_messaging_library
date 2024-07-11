@@ -81,13 +81,12 @@ Save [this project(same as Snap!)](https://microblocksfun.cn/run/microblocks.htm
 
 ```py
 # pip install -U microblocks
-
 from microblocks import MicroblocksClient
 
 client = MicroblocksClient()
-client.discover(timeout=5)
-print("found devices:", client.found_devices.keys())
-client.connect("MicroBlocks QCQ", timeout=3)
+found_devices = client.discover(timeout=5)
+print("found devices:", found_devices)
+client.connect("MicroBlocks AZB", timeout=3)
 
 client.request("displayCharacter", ["f"])
 

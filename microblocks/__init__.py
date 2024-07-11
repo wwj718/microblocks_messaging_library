@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.8.1"
+__version__ = "0.9.0"
 
 import uuid
 import threading
@@ -286,6 +286,38 @@ class MicroblocksClient(MicroblocksBLEMessage):
         # message["meta"]["id"] = 'python-' + message["meta"]["id"][:8]
         message["meta"]["id"] = message["meta"]["id"][:6]
         return self.agent._request(message, timeout=timeout)
+
+    @property
+    def tiltX(self):
+        return int(self.request("[sensors:tiltX]", []))
+
+    @property
+    def tiltY(self):
+        return int(self.request("[sensors:tiltY]", []))
+
+    @property
+    def tiltZ(self):
+        return int(self.request("[sensors:tiltZ]", []))
+
+    @property
+    def acceleration(self):
+        return int(self.request("[sensors:acceleration]", []))
+
+    @property
+    def temperature(self):
+        return int(self.request("[sensors:temperature]", []))
+
+    def plot(self, x, y):
+        self.request("[display:mbPlot]", [x, y])
+
+    def clear_display(self):
+        self.request("[display:mbDisplayOff]", [])
+
+    def scroll_text(self, text):
+        self.request("scroll_text", [text], callType="blocking_call", timeout=10)
+
+    def stop_scrolling_text(self):
+        self.request("stopScrollingText", [])
 
 
 SerialMessage = MicroblocksSerialMessage

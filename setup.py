@@ -10,7 +10,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['pyserial==3.5', 'adafruit-circuitpython-ble==10.0.7', 'dynatalk==0.7.3']
+requirements = ['pyserial==3.5', 'adafruit-circuitpython-ble==10.0.7', 'dynatalk==0.8.0']
 
 setup_requirements = [
     'pytest-runner',
@@ -45,6 +45,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/wwj718/microblocks_messaging_library',
-    version='0.7.3',
+    version='0.8.0',
     zip_safe=False,
 )

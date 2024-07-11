@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.7.3"
+__version__ = "0.8.0"
 
 import uuid
 import threading
@@ -104,6 +104,7 @@ class MicroBlocksBase:
         # non-blocking
         # https://stackoverflow.com/questions/70625801/threading-reading-a-serial-port-in-python-with-a-gui
         thread = threading.Thread(target=self._processReceiveBroadcasts, args=())
+        thread.daemon = True
         thread.start()
 
 
@@ -180,6 +181,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
 
     def discover(self, timeout=3):
 
+        print("discovering...")
         # Modifying class variables
         MicroblocksBLEMessage.found_devices = {}
 
@@ -193,15 +195,10 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         return list(MicroblocksBLEMessage.found_devices.keys())
 
     def disconnect(self):
-        pass
+        print("disconnect")
         # print("connected:", self.connection.connected)
-
-        """
-        if self.connection:
+        if self.connection and self.connection.connected:
             self.connection.disconnect()
-        else:
-            raise ValueError("Device not connected.")
-        """
 
     def sendBroadcast(self, aString):
         if self.connection.connected:

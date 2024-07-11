@@ -90,12 +90,9 @@ client.connect("MicroBlocks AZB", timeout=3)
 
 client.request("displayCharacter", ["f"])
 
-try:
-    while True:
-      tiltX = client.request("[sensors:tiltX]", [], timeout=1)
-      print(tiltX)
-except KeyboardInterrupt:
-    pass
+while True:
+    tiltX = client.request("[sensors:tiltX]", [], timeout=1)
+    print(tiltX)
 ```
 
 ref: [MicroBlocks Client](https://wwj718.github.io/post/%E7%BC%96%E7%A8%8B/snap-microblocks-client/)

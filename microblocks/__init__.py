@@ -154,10 +154,6 @@ class MicroBlocksIDEService(UARTService):
 
 
 class MicroblocksBLEMessage(MicroBlocksBase):
-    """
-    only supports connecting to one device
-    todo: supports connecting multiple devices
-    """
 
     found_devices = {}
 
@@ -172,8 +168,7 @@ class MicroblocksBLEMessage(MicroBlocksBase):
             self.connect(device_name)
 
     def connect(self, device_name, timeout=3):
-        # MicroBlocks KCY
-        # assert len(self._ble.connections) == 0
+        # device_name, eg: MicroBlocks KCY
         if device_name not in self.found_devices:
             self.discover(timeout)
 
@@ -209,15 +204,6 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         """
 
     def sendBroadcast(self, aString):
-        """
-        if len(self._ble.connections) == 0:
-            raise ValueError(f"Device not connected.")
-        for connection in self._ble.connections:
-            bytes = self._generate_broadcast_message(aString)
-            # from IPython import embed; embed()
-            uart = connection[MicroBlocksIDEService]
-            uart.write(bytes)
-        """
         if self.connection.connected:
             bytes = self._generate_broadcast_message(aString)
             self.connection[MicroBlocksIDEService].write(bytes)
@@ -225,14 +211,6 @@ class MicroblocksBLEMessage(MicroBlocksBase):
             raise ValueError("Device not connected.")
 
     def receiveBroadcasts(self):
-        """
-        if len(self._ble.connections) == 0:
-            raise ValueError(f"Device not connected.")
-        assert len(self._ble.connections) == 1
-        uart = self._ble.connections[0][MicroBlocksIDEService]
-        # data = self.ser.read() # 从 buffer 里读取
-        data = uart.read(4)
-        """
         if self.connection.connected:
             data = self.connection[MicroBlocksIDEService].read(4)
             return self._decode_broadcast_message(data)
@@ -252,8 +230,6 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         from IPython import embed
 
         embed()
-        pass
-        # self._ble.connections
 
 
 # patch dyantalk

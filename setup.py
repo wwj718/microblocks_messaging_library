@@ -45,6 +45,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/wwj718/microblocks_messaging_library',
-    version='0.7.2',
+    version='0.7.3',
     zip_safe=False,
 )

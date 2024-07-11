@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.7.2"
+__version__ = "0.7.3"
 
 import uuid
 import threading
@@ -159,39 +159,43 @@ class MicroblocksBLEMessage(MicroBlocksBase):
     todo: supports connecting multiple devices
     """
 
-    def __init__(self, device_name_or_advertisement=None, verbose=False):
+    found_devices = {}
+
+    def __init__(self, device_name=None, verbose=False):
         self._ble = BLERadio()
-        self.found_devices = {}
         self.connection = None
         self._buffer = bytearray()
         self._verbose = verbose  # verbose: Print various debugging information
         self.on_message = None  # paho style:  https://www.eclipse.org/paho/index.php?page=clients/python/docs/index.php
 
-        if device_name_or_advertisement:
-            self.connect(device_name_or_advertisement)
+        if device_name:
+            self.connect(device_name)
 
-    def connect(self, device_name_or_advertisement, timeout=3):
+    def connect(self, device_name, timeout=3):
         # MicroBlocks KCY
         # assert len(self._ble.connections) == 0
-        if type(device_name_or_advertisement) == ProvideServicesAdvertisement:
-            self.connection = self._ble.connect(device_name_or_advertisement)
-        else:
-            if device_name_or_advertisement not in self.found_devices:
-                self.discover(timeout)
+        if device_name not in self.found_devices:
+            self.discover(timeout)
 
-            if device_name_or_advertisement in self.found_devices:
-                self.connection = self._ble.connect(self.found_devices[device_name_or_advertisement])
-                print(f"{device_name_or_advertisement} is connected")
-            else:
-                raise Exception("Device not found")
+        if device_name in self.found_devices:
+            self.connection = self._ble.connect(self.found_devices[device_name])
+            print(f"{device_name} is connected")
+        else:
+            raise Exception("Device not found")
 
     def discover(self, timeout=3):
+
+        # Modifying class variables
+        MicroblocksBLEMessage.found_devices = {}
+
         for advertisement in self._ble.start_scan(
             ProvideServicesAdvertisement, timeout=timeout
-        ):            
+        ):
             if MicroBlocksIDEService in advertisement.services:
-                self.found_devices[advertisement.complete_name] = advertisement
-        return list(self.found_devices.keys())
+                MicroblocksBLEMessage.found_devices[advertisement.complete_name] = (
+                    advertisement
+                )
+        return list(MicroblocksBLEMessage.found_devices.keys())
 
     def disconnect(self):
         pass
@@ -273,14 +277,15 @@ Agent.send = send
 
 
 class MicroblocksClient(MicroblocksBLEMessage):
-    def __init__(self, device_name_or_advertisement=None, verbose=False):
-        super().__init__(device_name_or_advertisement, verbose)
+
+    def __init__(self, device_name=None, verbose=False):
+        super().__init__(device_name, verbose)
         self.agent = Agent("agent")
         self.agent.microblocks_client = self
         # print("connected:", self.connection.connected)
 
-    def connect(self, device_name_or_advertisement, timeout=3):
-        super().connect(device_name_or_advertisement, timeout)
+    def connect(self, device_name, timeout=3):
+        super().connect(device_name, timeout)
         if self.connection and self.connection.connected:
             self.send("_start BLE loop")  # ??
             time.sleep(0.1)

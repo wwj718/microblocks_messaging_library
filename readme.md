@@ -103,7 +103,7 @@ ref: [MicroBlocks Client](https://wwj718.github.io/post/%E7%BC%96%E7%A8%8B/snap-
 from microblocks import MicroblocksClient
 
 client = MicroblocksClient()
-found_devices = client.discover(timeout=5)
+found_devices = client.discover(timeout=3) # timeout=5 in windows
 print("found devices:", found_devices)
 # connect all discovered devices
 devices = [MicroblocksClient(i) for i in found_devices]

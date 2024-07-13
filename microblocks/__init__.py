@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 
 import uuid
 import threading
@@ -309,6 +309,9 @@ class MicroblocksClient(MicroblocksBLEMessage):
 
     def plot(self, x, y):
         self.request("[display:mbPlot]", [x, y])
+
+    def display_character(self, c):
+        self.request("displayCharacter", [c])
 
     def clear_display(self):
         self.request("[display:mbDisplayOff]", [])

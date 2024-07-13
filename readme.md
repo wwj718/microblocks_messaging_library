@@ -84,15 +84,34 @@ Save [this project(same as Snap!)](https://microblocksfun.cn/run/microblocks.htm
 from microblocks import MicroblocksClient
 
 client = MicroblocksClient()
-found_devices = client.discover(timeout=5)
+found_devices = client.discover(timeout=3) # timeout=5 in windows
 print("found devices:", found_devices)
 client.connect("MicroBlocks AZB", timeout=3)
 
-client.request("displayCharacter", ["f"])
+client.display_character("f")
 
 while True:
-    tiltX = client.request("[sensors:tiltX]", [], timeout=1)
+    tiltX = client.tiltX
     print(tiltX)
 ```
 
 ref: [MicroBlocks Client](https://wwj718.github.io/post/%E7%BC%96%E7%A8%8B/snap-microblocks-client/)
+
+### Connect multiple devices
+
+```py
+from microblocks import MicroblocksClient
+
+client = MicroblocksClient()
+found_devices = client.discover(timeout=5)
+print("found devices:", found_devices)
+# connect all discovered devices
+devices = [MicroblocksClient(i) for i in found_devices]
+
+for index, device in enumerate(devices):
+    device.display_character(index)
+```
+
+## demo
+
+ref: [notebooks](./notebooks)

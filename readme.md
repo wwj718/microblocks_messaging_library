@@ -112,6 +112,17 @@ for index, device in enumerate(devices):
     device.display_character(index)
 ```
 
+### Parallel Control
+
+```py
+from concurrent.futures import ThreadPoolExecutor
+
+# Launching parallel tasks: https://docs.python.org/3/library/concurrent.futures.html
+with ThreadPoolExecutor() as executor:
+    for client in devices:
+        executor.submit(client.scroll_text, "hello")
+```
+
 ## demo
 
 ref: [notebooks](./notebooks)

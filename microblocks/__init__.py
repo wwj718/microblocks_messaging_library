@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.9.1"
+__version__ = "0.9.2"
 
 import uuid
 import threading
@@ -217,7 +217,8 @@ class MicroblocksBLEMessage(MicroBlocksBase):
     def command(self, functionName, parameterList, callType="call"):
         assert type(parameterList) == list
         msgID = f"python-{uuid.uuid4().hex[:8]}"
-        parameterList = [f'"{i}"' if type(i) == str else i for i in parameterList]
+        # parameterList = [f'"{i}"' if type(i) == str else i for i in parameterList]
+        parameterList = [f'"{i}"' if isinstance(i, str) else ('true' if i is True else 'false') if isinstance(i, bool) else i for i in parameterList]
         msg = [callType, msgID, functionName] + parameterList
         msg_string = ",".join([str(i) for i in msg])
         # print("msg_string:", msg_string)
@@ -238,7 +239,8 @@ def send(self, message):
     args = message["action"]["args"]
     # assert type(parameterList) == list
     # msgID = f"python-{uuid.uuid4().hex[:8]}"
-    args = [f'"{i}"' if type(i) == str else i for i in args]
+    # args = [f'"{i}"' if type(i) == str else i for i in args]
+    args = [f'"{i}"' if isinstance(i, str) else ('true' if i is True else 'false') if isinstance(i, bool) else i for i in args]
     msg = [callType, msgID, actionName] + args
     msg_string = ",".join([str(i) for i in msg])
     # print("msg_string:", msg_string)

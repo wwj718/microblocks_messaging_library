@@ -1,7 +1,7 @@
 # John Maloney, October 2022
 # Revised by Wenjie Wu, October 2022
 
-__version__ = "0.9.2"
+__version__ = "0.10.0"
 
 import uuid
 import threading
@@ -89,12 +89,16 @@ class MicroBlocksBase:
         return self.receiveBroadcasts()
 
     def _processReceiveBroadcasts(self):
-        while True:
-            message = self.receiveBroadcasts()
-            if callable(self.on_message):
-                self.on_message(message)
-            if callable(self._on_message):
-                self._on_message(message)
+        while self.is_connected():
+            try:
+                message = self.receiveBroadcasts()
+                if callable(self.on_message):
+                    self.on_message(message)
+                if callable(self._on_message):
+                    self._on_message(message)
+            except:
+                pass
+                
 
     def loopForever(self):
         # blocking
@@ -107,6 +111,9 @@ class MicroBlocksBase:
         thread = threading.Thread(target=self._processReceiveBroadcasts, args=())
         thread.daemon = True
         thread.start()
+    
+    def is_connected(self):
+        raise NotImplementedError("Please implement is_connected")
 
 
 class MicroblocksSerialMessage(MicroBlocksBase):
@@ -141,6 +148,9 @@ class MicroblocksSerialMessage(MicroBlocksBase):
     def receiveBroadcasts(self):
         data = self.ser.read()
         return self._decode_broadcast_message(data)
+
+    def is_connected(self):
+        return self.ser is not None and self.ser.is_open
 
 
 # ref: https://github.com/adafruit/Adafruit_CircuitPython_BLE/blob/744933f3061ce1d4007cb738737c66f19ebfcd27/examples/ble_uart_echo_client.py
@@ -238,6 +248,9 @@ class MicroblocksBLEMessage(MicroBlocksBase):
         from IPython import embed
 
         embed()
+
+    def is_connected(self):
+        return self.connection is not None and self.connection.connected
 
 
 # patch dyantalk

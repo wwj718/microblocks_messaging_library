@@ -123,6 +123,10 @@ with ThreadPoolExecutor() as executor:
         executor.submit(client.scroll_text, "hello")
 ```
 
+---
+
+Serial version: `SerialClient`
+
 ## demo
 
 ref: [notebooks](./notebooks)

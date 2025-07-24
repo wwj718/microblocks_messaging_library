@@ -8,6 +8,7 @@ import threading
 import time
 
 import serial
+import serial.tools.list_ports
 
 from adafruit_ble import BLERadio
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
@@ -120,6 +121,15 @@ class MicroblocksSerialMessage(MicroBlocksBase):
 
     def connect(self, port):
         self.ser = serial.Serial(port, 115200)
+
+    def discover(self):
+        print("discovering...")
+        comports = serial.tools.list_ports.comports()
+        ports = []
+        for p in comports:
+            ports.append(p.device)
+
+        return ports
 
     def disconnect(self):
         self.ser.close()
@@ -324,6 +334,43 @@ class MicroblocksClient(MicroblocksBLEMessage):
     def stop_scrolling_text(self):
         self.request("stopScrollingText", [])
 
+class MicroblocksSerialClient(MicroblocksSerialMessage):
+    def __init__(self, port=None, verbose=False):
+        super().__init__(port, verbose)
+        self.agent = Agent("agent")
+        self.agent.microblocks_client = self
+
+    def connect(self, port):
+        super().connect(port)
+        if self.ser and self.ser.is_open:
+            self.send("_start Serial loop")  # ??
+            time.sleep(0.1)
+            self.loopStart()
+
+    def _on_message(self, message):
+        # fake message
+        if message:
+            # print("_on_message:", message)
+            mb_message = message.split(",")
+            # print(mb_message)
+            if mb_message and mb_message[0] == "[response]":
+                parent_id = mb_message[1]
+                value = mb_message[2]
+                message = self.agent.generateMessage(
+                    parent_id, "agent", "[response]", {"value": value}
+                )
+                # print("message:", message)
+                self.agent._receive(message)
+
+    def request(self, actionName, args, callType="call", timeout=3):
+        # callType: call, blocking_call
+        parent_id = None
+        message = self.agent.generateMessage(parent_id, callType, actionName, args)
+        # message["meta"]["id"] = 'python-' + message["meta"]["id"][:8]
+        message["meta"]["id"] = message["meta"]["id"][:6]
+        return self.agent._request(message, timeout=timeout)
 
 SerialMessage = MicroblocksSerialMessage
 Message = MicroblocksBLEMessage
+SerialClient = MicroblocksSerialClient
+Client = MicroblocksClient

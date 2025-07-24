@@ -75,7 +75,7 @@ Work with the MicroBlocks code (you can save this PNG file, then drag it into Mi
 - [MicroBlocks and Snap! Communication with Messages](https://wiki.microblocks.fun/snap/microblocks_snap_messaging)
 - [Microblocks Serial Protocol (version 2.09)](https://bitbucket.org/john_maloney/smallvm/src/master/misc/SERIAL_PROTOCOL.md)
 
-## MicroBlocksClient
+## MicroBlocksClient (BLE)
 
 Save [this project(same as Snap!)](https://microblocksfun.cn/run/microblocks.html#project=https://wwj718.github.io/post/img/MicroBlocks-server-dynatalk.ubp) to your MicroBlocks device
 
